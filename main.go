@@ -7,8 +7,12 @@ import (
 )
 
 func main() {
-	// 初始化 Gin 实例
-	r := gin.Default()
+
+	// new 一个 Gin Engine 实例
+	r := gin.New() // r := gin.Default()default里面包含了一个engine.use默认注册了logger和recovery两个中间件
+
+	// 注册中间件
+	r.Use(gin.Logger(), gin.Recovery())
 
 	// 注册一个路由
 	r.GET("/", func(c *gin.Context) {
@@ -19,6 +23,6 @@ func main() {
 		})
 	})
 
-	// 运行服务
-	r.Run()
+	// 运行服务，默认为 8080，我们指定端口为 8000
+	r.Run(":8000")
 }
