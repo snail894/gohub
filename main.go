@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -9,7 +10,7 @@ import (
 func main() {
 
 	// new 一个 Gin Engine 实例
-	r := gin.New() // r := gin.Default()default里面包含了一个engine.use默认注册了logger和recovery两个中间件
+	r := gin.New()
 
 	// 注册中间件
 	r.Use(gin.Logger(), gin.Recovery())
@@ -23,6 +24,23 @@ func main() {
 		})
 	})
 
-	// 运行服务，默认为 8080，我们指定端口为 8000
+	// 处理 404 请求
+	r.NoRoute(func(c *gin.Context) {
+		// 获取标头信息的 Accept 信息
+		//c.Request 是 gin 封装的请求对象，所有用户的请求信息，都可以从这个对象中获取。
+		acceptString := c.Request.Header.Get("Accept")
+		if strings.Contains(acceptString, "text/html") {
+			// 如果是 HTML 的话
+			c.String(http.StatusNotFound, "页面返回 404")
+		} else {
+			// 默认返回 JSON
+			c.JSON(http.StatusNotFound, gin.H{
+				"error_code":    404,
+				"error_message": "路由未定义，请确认 url 和请求方法是否正确。",
+			})
+		}
+	})
+
+	// 运行服务
 	r.Run(":8000")
 }
